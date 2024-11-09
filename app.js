@@ -7,8 +7,9 @@ const colorOptions=Array.from(document.getElementsByClassName("color-option"))
 const modeBtn = document.getElementById("mode-btn");
 const resetBtn = document.getElementById("reset-btn");
 const eraseBtn = document.getElementById("eraser-btn");
+const fileInput=document.getElementById("file")
 
-const CANVAS_WIDTH =800;
+const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 800;
 
 ctx.lineWidth=lineWidth.value;
@@ -82,7 +83,7 @@ function onCanvasClick(event){
 canvas.addEventListener("click",onCanvasClick)
 
 //RESET
-function onResetClick(){
+function onResetClick(event){
         ctx.fillStyle="white";
         ctx.fillRect(0,0, CANVAS_WIDTH,CANVAS_HEIGHT);
  
@@ -90,9 +91,23 @@ function onResetClick(){
 resetBtn.addEventListener("click",onResetClick)
 
 //ERASE
-function onEraserClick(){
+function onEraserClick(event){
     ctx.strokeStyle="white";
     isFilling=false;
     modeBtn.innerText="Fill";
 }
 eraseBtn.addEventListener("click",onEraserClick);
+//IMG
+function onFileChange(event){
+    const file = event.target.files[0]
+    const url = URL.createObjectURL(file)
+    const image = new Image()
+    image.src = url;
+    image.onload = function(){
+        ctx.drawImage(image, 0,0 ,CANVAS_WIDTH, CANVAS_HEIGHT)
+        fileInput.value = null;
+    };
+}
+fileInput.addEventListener("change",onFileChange)
+
+//TEXT
