@@ -1,29 +1,98 @@
 const canvas = document.querySelector("canvas");
 const ctx= canvas.getContext("2d");
 
-canvas.width=800;
-canvas.height=800;
+const lineWidth=document.getElementById("line-width")
+const color = document.getElementById("color")
+const colorOptions=Array.from(document.getElementsByClassName("color-option"))
+const modeBtn = document.getElementById("mode-btn");
+const resetBtn = document.getElementById("reset-btn");
+const eraseBtn = document.getElementById("eraser-btn");
 
-ctx.lineWidth=2;
-const colors =[
-    "#ff3838",
-    "#ffb8b8",
-    "#c56cf0",
-    "#ff9f1a",
-    "#fff200",
-    "#32ff7e",
-    "#7efff5",
-    "#18dcff",
-    "#7d5fff",
-];
+const CANVAS_WIDTH =800;
+const CANVAS_HEIGHT = 800;
 
-function onClick(event){
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-    const color = colors[Math.floor(Math.random()*colors.length)];
-    ctx.strokeStyle=color;
-    ctx.lineTo(event.offsetX, event.offsetY);
-    ctx.stroke();
+ctx.lineWidth=lineWidth.value;
+
+let isPainting = false;
+let isFilling= false;
+
+function startPainting(event){
+    isPainting= true;
+}
+function cancelPainting(event){
+    //ctx.beginPath(); or it can be placed here
+    isPainting=false;
 }
 
-canvas.addEventListener("click",onclick);
+function onMove(event){
+    if(isPainting){
+        ctx.lineTo(event.offsetX,event.offsetY);
+        ctx.stroke();
+        return;
+    }
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY); //else
+}
+
+
+canvas.addEventListener("mousemove", onMove)
+canvas.addEventListener("mousedown",startPainting)
+canvas.addEventListener("mouseup",cancelPainting)
+document.addEventListener("mouseup",cancelPainting)
+//canvas.addEventListener("mouseleave",cancelPainting)
+
+function onLineWidthChange(event){
+    ctx.lineWidth=event.target.value;
+}
+lineWidth.addEventListener("change",onLineWidthChange);
+
+function onColorChange(event){
+    ctx.strokeStyle=event.target.value;
+    ctx.fillStyle= event.target.value;
+}
+color.addEventListener("change",onColorChange);
+
+//flat UI colors - website for color palette
+function onColorClick(event){
+    const colorValue=event.target.dataset.color;
+    ctx.strokeStyle=colorValue;
+    ctx.fillStyle= colorValue;
+    color.value= colorValue;
+}
+colorOptions.forEach(color => color.addEventListener("click", onColorClick));
+
+//Fill Background
+function onModeClick(event){
+    if(isFilling){
+        isFilling=false;
+        modeBtn.innerText="Fill";
+    }else{
+        isFilling =true;
+        modeBtn.innerText="Draw";
+    }
+}
+modeBtn.addEventListener("click",onModeClick)
+
+
+function onCanvasClick(event){
+    if(isFilling){
+        ctx.fillRect(0,0, CANVAS_WIDTH,CANVAS_HEIGHT);
+    }
+}
+canvas.addEventListener("click",onCanvasClick)
+
+//RESET
+function onResetClick(){
+        ctx.fillStyle="white";
+        ctx.fillRect(0,0, CANVAS_WIDTH,CANVAS_HEIGHT);
+ 
+}
+resetBtn.addEventListener("click",onResetClick)
+
+//ERASE
+function onEraserClick(){
+    ctx.strokeStyle="white";
+    isFilling=false;
+    modeBtn.innerText="Fill";
+}
+eraseBtn.addEventListener("click",onEraserClick);
